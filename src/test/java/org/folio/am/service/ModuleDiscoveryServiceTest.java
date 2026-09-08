@@ -191,7 +191,7 @@ class ModuleDiscoveryServiceTest {
 
       var moduleDiscovery = TestValues.moduleDiscovery().id(null);
       var moduleDiscoveries = new ModuleDiscoveries().discovery(List.of(moduleDiscovery));
-      var result = service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN);
+      var result = service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN, false);
 
       assertThat(result).isEqualTo(TestValues.moduleDiscoveries(TestValues.moduleDiscovery()));
     }
@@ -201,7 +201,7 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscovery = TestValues.moduleDiscovery().id("invalid id");
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN, false))
         .isInstanceOf(RequestValidationException.class)
         .hasMessage("Discovery id must match name-version pattern")
         .satisfies(exception ->
@@ -215,7 +215,7 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
       when(repository.findAllById(List.of(MODULE_ID))).thenReturn(emptyList());
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN, false))
         .isInstanceOf(EntityNotFoundException.class)
         .hasMessage("Modules are not found for ids: %s", List.of(MODULE_ID));
     }
@@ -227,7 +227,7 @@ class ModuleDiscoveryServiceTest {
       var moduleEntity = TestValues.moduleEntity(MODULE_URL);
       when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
 
-      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN))
+      assertThatThrownBy(() -> service.create(moduleDiscoveries, OKAPI_AUTH_TOKEN, false))
         .isInstanceOf(EntityExistsException.class)
         .hasMessage("Module Discovery already exists for ids: %s", List.of(MODULE_ID));
     }

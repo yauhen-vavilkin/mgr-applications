@@ -324,6 +324,15 @@ paths:
         - module-discovery
       parameters:
         - $ref: '#/components/parameters/x-okapi-token'
+        - name: ignoreConflicts
+          in: query
+          required: false
+          description: |
+            If true, modules that already have discovery information are skipped (existing discovery is not
+            overwritten) and returned as is; if false, such modules cause a conflict error.
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           application/json:

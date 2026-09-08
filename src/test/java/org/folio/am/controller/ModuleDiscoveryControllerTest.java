@@ -116,7 +116,8 @@ class ModuleDiscoveryControllerTest {
   void createModuleDiscovery_positive_batchRequest() throws Exception {
     var request = moduleDiscoveries(moduleDiscovery().id(null));
     when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
-    when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN)).thenReturn(moduleDiscoveries(moduleDiscovery()));
+    when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN, false))
+      .thenReturn(moduleDiscoveries(moduleDiscovery()));
     when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
     when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
     when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
