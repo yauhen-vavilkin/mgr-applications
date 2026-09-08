@@ -62,6 +62,7 @@ public class ApplicationService {
   private final ModuleDiscoveryService discoveryService;
   @Lazy private final ApplicationValidatorService applicationValidatorService;
   private final ModuleDescriptorLoader moduleDescriptorLoader;
+  private final ModuleBootstrapCacheVersionService bootstrapCacheVersionService;
 
   @Setter(onMethod_ = @Autowired(required = false))
   private EntitlementService entitlementService;
@@ -215,6 +216,9 @@ public class ApplicationService {
 
     removeModulesFromApplication(application, token);
     appRepository.delete(application);
+    if (bootstrapCacheVersionService != null) {
+      bootstrapCacheVersionService.increment();
+    }
 
     log.debug("Application Descriptor entity deleted: id = {}", application.getId());
   }
@@ -259,6 +263,9 @@ public class ApplicationService {
 
     var saved = appRepository.save(entity);
     log.debug("Application Descriptor entity saved: id = {}", saved.getId());
+    if (bootstrapCacheVersionService != null) {
+      bootstrapCacheVersionService.increment();
+    }
 
     return saved.getApplicationDescriptor();
   }

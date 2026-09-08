@@ -1,7 +1,9 @@
 package org.folio.am.repository;
 
 import java.util.List;
+import org.folio.am.domain.entity.ModuleBootstrapDataProjection;
 import org.folio.am.domain.entity.ModuleBootstrapView;
+import org.folio.am.domain.entity.ModuleLocationProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,19 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ModuleBootstrapRepository extends JpaRepository<ModuleBootstrapView, String> {
+
+  @Query(value = "SELECT m.id AS moduleId, am.application_id AS applicationId, m.name AS name, "
+    + "m.version AS version, COALESCE(m.descriptor, '{}'::jsonb) @> "
+    + "'{\"metadata\": {\"user\": {\"type\": \"system\"}}}' AS systemUserRequired, "
+    + "CAST(m.descriptor AS text) AS descriptor FROM module m JOIN application_module am ON am.module_id = m.id "
+    + "WHERE am.application_id IN :applicationIds AND m.type = 'BACKEND' "
+    + "ORDER BY am.application_id, m.id", nativeQuery = true)
+  List<ModuleBootstrapDataProjection> findBackendDataByApplicationIds(
+    @Param("applicationIds") List<String> applicationIds);
+
+  @Query(value = "SELECT m.id AS moduleId, m.discovery_url AS location FROM module m WHERE m.id IN :moduleIds",
+    nativeQuery = true)
+  List<ModuleLocationProjection> findLocationsByModuleIds(@Param("moduleIds") List<String> moduleIds);
 
   /**
    * Queries the module and all its dependencies by the given id.

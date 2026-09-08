@@ -31,6 +31,12 @@ public class ModuleBootstrapView {
   @Column(name = "application_id")
   private String applicationId;
 
+  @Column(name = "name")
+  private String name;
+
+  @Column(name = "version")
+  private String version;
+
   @Column(name = "discovery_url")
   private String location;
 
