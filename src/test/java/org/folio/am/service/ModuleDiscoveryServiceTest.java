@@ -233,6 +233,39 @@ class ModuleDiscoveryServiceTest {
     }
 
     @Test
+    void positive_batchRequestIgnoreConflictsAndModuleDiscoveryUrlIsPresent() {
+      var moduleDiscovery = TestValues.moduleDiscovery();
+      var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
+      var moduleEntity = TestValues.moduleEntity(MODULE_URL);
+      when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
+      when(mapper.convert(moduleEntity)).thenReturn(moduleDiscovery);
+
+      var result = service.create(moduleDiscoveries, true, OKAPI_AUTH_TOKEN);
+
+      assertThat(result).isEqualTo(moduleDiscoveries);
+    }
+
+    @Test
+    void positive_batchRequestIgnoreConflictsMixedWithNewModule() {
+      var existingDiscovery = TestValues.moduleDiscovery();
+      var newDiscovery = TestValues.uiModuleDiscovery();
+      var existingModule = TestValues.moduleEntity(MODULE_URL);
+      var newModule = TestValues.uiModuleEntity();
+      when(repository.findAllById(List.of(MODULE_ID, UI_MODULE_ID))).thenReturn(List.of(existingModule, newModule));
+      when(mapper.convert(existingModule)).thenReturn(existingDiscovery);
+      when(repository.saveAndFlush(newModule)).thenReturn(newModule);
+      when(mapper.convert(newModule)).thenReturn(newDiscovery);
+      doNothing().when(eventPublisher).publishDiscoveryCreate(newDiscovery, ModuleType.UI, OKAPI_AUTH_TOKEN);
+
+      var request = TestValues.moduleDiscoveries(TestValues.moduleDiscovery().id(null),
+        TestValues.uiModuleDiscovery().id(null));
+      var result = service.create(request, true, OKAPI_AUTH_TOKEN);
+
+      assertThat(result).isEqualTo(TestValues.moduleDiscoveries(existingDiscovery, newDiscovery));
+      assertThat(existingModule.getDiscoveryUrl()).isEqualTo(MODULE_URL);
+    }
+
+    @Test
     void positive_uiModule() {
       var uiModuleEntity = TestValues.uiModuleEntity();
       var expectedUiModuleDiscovery = TestValues.uiModuleDiscovery();

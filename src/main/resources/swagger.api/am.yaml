@@ -324,6 +324,7 @@ paths:
         - module-discovery
       parameters:
         - $ref: '#/components/parameters/x-okapi-token'
+        - $ref: '#/components/parameters/ignore-conflicts'
       requestBody:
         content:
           application/json:
@@ -507,6 +508,14 @@ components:
       schema:
         type: boolean
         default: true
+    ignore-conflicts:
+      in: query
+      name: ignoreConflicts
+      required: false
+      description: Skip modules that already have discovery information.
+      schema:
+        type: boolean
+        default: false
     query-offset:
       in: query
       required: false

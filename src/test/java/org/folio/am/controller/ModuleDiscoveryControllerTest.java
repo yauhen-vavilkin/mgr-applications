@@ -131,6 +131,26 @@ class ModuleDiscoveryControllerTest {
   }
 
   @Test
+  void createModuleDiscovery_positive_batchRequestIgnoringConflicts() throws Exception {
+    var request = moduleDiscoveries(moduleDiscovery().id(null));
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
+    when(moduleDiscoveryService.create(request, true, OKAPI_AUTH_TOKEN))
+      .thenReturn(moduleDiscoveries(moduleDiscovery()));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/modules/discovery")
+        .queryParam("ignoreConflicts", "true")
+        .content(asJsonString(request))
+        .header(TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(content().contentType(APPLICATION_JSON))
+      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery())), true));
+  }
+
+  @Test
   void updateModuleDiscovery_positive() throws Exception {
     var request = moduleDiscovery();
     when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
