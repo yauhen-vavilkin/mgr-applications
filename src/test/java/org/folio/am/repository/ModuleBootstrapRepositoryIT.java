@@ -18,17 +18,24 @@ import org.folio.test.types.IntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @IntegrationTest
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Sql(scripts =
   {
     "classpath:/sql/application-descriptor-with-routes.sql",
     "classpath:/sql/module-interface-references.sql"
-  }, executionPhase = BEFORE_TEST_METHOD)
+  },
+  config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED),
+  executionPhase = BEFORE_TEST_METHOD)
 @Sql(
   scripts = "classpath:/sql/truncate-tables.sql",
+  config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED),
   executionPhase = AFTER_TEST_METHOD
 )
 class ModuleBootstrapRepositoryIT extends BaseRepositoryTest {
