@@ -187,7 +187,7 @@ public class ModuleDiscoveryService {
     }
 
     var moduleIds = mapItems(discoveryDescriptors, Artifact::getArtifactId);
-    var moduleEntities = repository.findAllById(moduleIds);
+    var moduleEntities = findModuleEntities(moduleIds, ignoreConflicts);
 
     if (moduleEntities.size() != discoveryDescriptors.size()) {
       var foundModuleIds = mapItems(moduleEntities, ModuleEntity::getId);
@@ -202,6 +202,10 @@ public class ModuleDiscoveryService {
 
     var moduleEntityMap = moduleEntities.stream().collect(toMap(ArtifactEntity::getId, identity()));
     return mapItems(moduleIds, moduleEntityMap::get);
+  }
+
+  private List<ModuleEntity> findModuleEntities(List<String> moduleIds, boolean ignoreConflicts) {
+    return ignoreConflicts ? repository.findAllByIdForUpdate(moduleIds) : repository.findAllById(moduleIds);
   }
 
   private ModuleDiscovery addDiscoveryUrlForModule(ModuleEntity entity, String location, String token) {

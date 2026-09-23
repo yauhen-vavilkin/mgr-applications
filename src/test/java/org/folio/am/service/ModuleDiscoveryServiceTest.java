@@ -237,7 +237,7 @@ class ModuleDiscoveryServiceTest {
       var moduleDiscovery = TestValues.moduleDiscovery();
       var moduleDiscoveries = TestValues.moduleDiscoveries(moduleDiscovery);
       var moduleEntity = TestValues.moduleEntity(MODULE_URL);
-      when(repository.findAllById(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
+      when(repository.findAllByIdForUpdate(List.of(MODULE_ID))).thenReturn(List.of(moduleEntity));
       when(mapper.convert(moduleEntity)).thenReturn(moduleDiscovery);
 
       var result = service.create(moduleDiscoveries, true, OKAPI_AUTH_TOKEN);
@@ -251,7 +251,8 @@ class ModuleDiscoveryServiceTest {
       var newDiscovery = TestValues.uiModuleDiscovery();
       var existingModule = TestValues.moduleEntity(MODULE_URL);
       var newModule = TestValues.uiModuleEntity();
-      when(repository.findAllById(List.of(MODULE_ID, UI_MODULE_ID))).thenReturn(List.of(existingModule, newModule));
+      when(repository.findAllByIdForUpdate(List.of(MODULE_ID, UI_MODULE_ID)))
+        .thenReturn(List.of(existingModule, newModule));
       when(mapper.convert(existingModule)).thenReturn(existingDiscovery);
       when(repository.saveAndFlush(newModule)).thenReturn(newModule);
       when(mapper.convert(newModule)).thenReturn(newDiscovery);
