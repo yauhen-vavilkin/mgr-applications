@@ -17,6 +17,7 @@
 * POST /applications/validate-interfaces (mgr-applications) is impractical for incremental app registration (MGRAPPS-123)
 * Add dependency-scoped validation for application descriptors using `scopeApplicationId` (MGRAPPS-101)
 * Honor `preRelease` flag on Dependency in `POST validate-descriptors` API (MGRAPPS-103)
+* Add `DeployConfig.json` for module configuration management per ADR-0013 (MGRAPPS-120)
 
 ---
 
