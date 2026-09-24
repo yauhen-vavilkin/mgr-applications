@@ -1,0 +1,913 @@
+{
+  "description": "mgr-applications configuration template. Default values are calibrated against the bugfest environment reference baseline as required by ADR-0013 (Module configuration management). Values for secrets and environment-specific endpoints have no default and must be provided by the deployment.",
+  "moduleDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for container"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "896",
+        "description": "Memory reservation for container"
+      }
+    ],
+    "java": [
+      {
+        "name": "xmx",
+        "value": "512m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "256m",
+        "description": "Maximum Java metaspace size"
+      },
+      {
+        "name": "MetaspaceSize",
+        "value": "192m",
+        "description": "Initial Java metaspace size"
+      }
+    ],
+    "deployment": {
+      "isHaSupported": true,
+      "replicasRecommendedCount": 2,
+      "description": "Deployment configuration for the backend module. Adjust replicas based on expected load and HA requirements. Set to false if only single instance is supported or required."
+    },
+    "kong": {
+      "timeouts": {
+        "connect": "60s",
+        "send": "60s",
+        "read": "60s"
+      },
+      "description": "Custom API Gateway (Kong) proxy timeouts for the module routes. Use this only if different from default Kong configuration"
+    },
+    "EnvVars": [
+      {
+        "name": "DB_DATABASE",
+        "value": "okapi_modules",
+        "description": "Postgres database name",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_HOST",
+        "value": "postgres",
+        "description": "Postgres hostname",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": null,
+        "description": "Postgres username password",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PORT",
+        "value": "5432",
+        "description": "Postgres port",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": "postgres",
+        "description": "Postgres username",
+        "type": "DB",
+        "essential": true
+      },
+
+      {
+        "name": "APIGW_API_KEY",
+        "value": null,
+        "description": "APISIX Admin API key (sent as X-API-KEY). Required when APIGW_TYPE=apisix; ignored for Kong.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_CONNECT_TIMEOUT",
+        "value": null,
+        "description": "Timeout in milliseconds for establishing a connection from the gateway to upstream service. If not provided then gateway defaults are applied.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_ENABLED",
+        "value": true,
+        "description": "Defines if API Gateway integration is enabled or disabled. If set to false - it will exclude all gateway-related beans from spring context.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_READ_TIMEOUT",
+        "value": null,
+        "description": "Timeout in milliseconds between two successive read operations for transmitting a request from the gateway to the upstream service. If not provided then gateway defaults are applied.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_REGISTER_MODULE",
+        "value": true,
+        "description": "Defines if module must be registered in the API Gateway (it will create for itself service and list of routes from module descriptor).",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_RETRIES",
+        "value": null,
+        "description": "Number of retries to execute upon failure to proxy. If not provided then gateway defaults are applied.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_TLS_ENABLED",
+        "value": false,
+        "description": "Allows to enable/disable TLS connection to the API Gateway.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_TLS_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Truststore password for TLS connection to the API Gateway.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_TLS_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Truststore file path for TLS connection to the API Gateway.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_TLS_TRUSTSTORE_TYPE",
+        "value": null,
+        "description": "Truststore type for TLS connection to the API Gateway.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_TYPE",
+        "value": "kong",
+        "description": "Active API Gateway implementation: kong or apisix. Selects which integration library performs self-registration; APIGW_URL and APIGW_TLS_* apply to the selected gateway.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "APIGW_URL",
+        "value": null,
+        "description": "API Gateway Admin URL used to perform HTTP requests for self-registration, required unless APIGW_ENABLED=false.",
+        "type": "GATEWAY",
+        "essential": true
+      },
+      {
+        "name": "APIGW_WRITE_TIMEOUT",
+        "value": null,
+        "description": "Timeout in milliseconds between two successive write operations for transmitting a request from the gateway to the upstream service. If not provided then gateway defaults are applied.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_ADMIN_URL",
+        "value": null,
+        "description": "Deprecated: use APIGW_URL instead. Used only when APIGW_URL is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_CONNECT_TIMEOUT",
+        "value": null,
+        "description": "Deprecated: use APIGW_CONNECT_TIMEOUT instead. Used only when APIGW_CONNECT_TIMEOUT is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_INTEGRATION_ENABLED",
+        "value": null,
+        "description": "Deprecated: use APIGW_ENABLED instead. Used only when APIGW_ENABLED is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_READ_TIMEOUT",
+        "value": null,
+        "description": "Deprecated: use APIGW_READ_TIMEOUT instead. Used only when APIGW_READ_TIMEOUT is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_RETRIES",
+        "value": null,
+        "description": "Deprecated: use APIGW_RETRIES instead. Used only when APIGW_RETRIES is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_TLS_ENABLED",
+        "value": null,
+        "description": "Deprecated: use APIGW_TLS_ENABLED instead. Used only when APIGW_TLS_ENABLED is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_TLS_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Deprecated: use APIGW_TLS_TRUSTSTORE_PASSWORD instead. Used only when APIGW_TLS_TRUSTSTORE_PASSWORD is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_TLS_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Deprecated: use APIGW_TLS_TRUSTSTORE_PATH instead. Used only when APIGW_TLS_TRUSTSTORE_PATH is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_TLS_TRUSTSTORE_TYPE",
+        "value": null,
+        "description": "Deprecated: use APIGW_TLS_TRUSTSTORE_TYPE instead. Used only when APIGW_TLS_TRUSTSTORE_TYPE is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "KONG_WRITE_TIMEOUT",
+        "value": null,
+        "description": "Deprecated: use APIGW_WRITE_TIMEOUT instead. Used only when APIGW_WRITE_TIMEOUT is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "MODULE_URL",
+        "value": "http://mgr-applications:8081",
+        "description": "Module URL (module cannot define url for gateway registration by itself, because it can be under Load Balancer, so this value must be provided manually).",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "REGISTER_MODULE_IN_KONG",
+        "value": null,
+        "description": "Deprecated: use APIGW_REGISTER_MODULE instead. Used only when APIGW_REGISTER_MODULE is not set; planned removal in the Vetch release.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+      {
+        "name": "kong.url",
+        "value": null,
+        "description": "Lowest-precedence system-property fallback for APIGW_URL, used by the integration test infrastructure.",
+        "type": "GATEWAY",
+        "essential": false
+      },
+
+      {
+        "name": "KAFKA_DISCOVERY_TOPIC_PARTITIONS",
+        "value": "1",
+        "description": "Amount of partitions for discovery topic.",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_DISCOVERY_TOPIC_REPLICATION_FACTOR",
+        "value": null,
+        "description": "Replication factor for discovery topic. If not set the Kafka broker default is applied.",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_HOST",
+        "value": "kafka",
+        "description": "Kafka broker hostname",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_PORT",
+        "value": "9092",
+        "description": "Kafka broker port",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_SECURITY_PROTOCOL",
+        "value": "PLAINTEXT",
+        "description": "Kafka security protocol",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_KEYSTORE_LOCATION",
+        "value": null,
+        "description": "Kafka SSL keystore location",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_KEYSTORE_PASSWORD",
+        "value": null,
+        "description": "Kafka SSL keystore password",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_TRUSTSTORE_LOCATION",
+        "value": null,
+        "description": "Kafka SSL truststore location",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_SSL_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Kafka SSL truststore password",
+        "type": "KAFKA",
+        "essential": false
+      },
+
+      {
+        "name": "KC_ADMIN_CLIENT_ID",
+        "value": "folio-backend-admin-client",
+        "description": "Keycloak client id. Used for register/create necessary records in keycloak from the internal module descriptor.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_CLIENT_SECRET",
+        "value": null,
+        "description": "Keycloak client secret. Conditionally required (only if admin username/password are not set) when Keycloak import is enabled.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_GRANT_TYPE",
+        "value": "client_credentials",
+        "description": "Keycloak admin grant type. Should be set to password if username/password are used instead of client secret.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_PASSWORD",
+        "value": null,
+        "description": "Keycloak admin password. Conditionally required (only if admin client secret is not set) when Keycloak import is enabled.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_ADMIN_USERNAME",
+        "value": null,
+        "description": "Keycloak admin username. Conditionally required (only if admin client secret is not set) when Keycloak import is enabled.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_AUTH_TOKEN_VALIDATE_URI",
+        "value": false,
+        "description": "Defines if validation for JWT must be run to compare configuration URL and token issuer for keycloak.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_ID",
+        "value": "mgr-applications",
+        "description": "Client id to be imported to Keycloak.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_ENABLED",
+        "value": false,
+        "description": "Enables TLS for keycloak clients.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Truststore password for keycloak clients.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Truststore file path for keycloak clients.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_CLIENT_TLS_TRUSTSTORE_TYPE",
+        "value": null,
+        "description": "Truststore file type for keycloak clients.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_FORCED_JWKS_REFRESH_INTERVAL",
+        "value": "60",
+        "description": "Forced jwks refresh interval for realm JWT parser (used in signing key rotation, in minutes).",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_IMPORT_ENABLED",
+        "value": false,
+        "description": "If true - at startup, register/create necessary records in keycloak from the internal module descriptor.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_INTEGRATION_ENABLED",
+        "value": true,
+        "description": "Defines if Keycloak integration is enabled or disabled. If set to false - it will exclude all keycloak-related beans from spring context.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_JWKS_BASE_URL",
+        "value": null,
+        "description": "Custom base URL for JWKS endpoint. If specified, will be used instead of issuer URL from token's iss claim (e.g., http://keycloak:8080).",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_JWKS_REFRESH_INTERVAL",
+        "value": "60",
+        "description": "Jwks refresh interval for realm JWT parser (in minutes).",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "KC_URL",
+        "value": "http://keycloak:8080",
+        "description": "Keycloak URL used to perform HTTP requests.",
+        "type": "KC",
+        "essential": false
+      },
+
+      {
+        "name": "SECURE_STORE_ENV",
+        "value": "folio",
+        "description": "First segment of the secure store key, for example prod or test. In Ramsons and Sunflower defaults to ENV with fall-back folio.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_ENDPOINT",
+        "value": null,
+        "description": "The HTTP endpoint to use for retrieving AWS credentials. This is ignored if useIAM is true.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_ECS_CREDENTIALS_PATH",
+        "value": null,
+        "description": "The path component of the credentials endpoint URI. This value is appended to the credentials endpoint to form the URI from which credentials can be obtained.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_REGION",
+        "value": null,
+        "description": "The AWS region to pass to the AWS SSM Client Builder. If not set, the AWS Default Region Provider Chain is used to determine which region to use.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_AWS_SSM_USE_IAM",
+        "value": true,
+        "description": "If true, will rely on the current IAM role for authorization instead of explicitly providing AWS credentials (access_key/secret_key).",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_ADDRESS",
+        "value": null,
+        "description": "The address (URL) of the FSSP service.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_ENABLE_SSL",
+        "value": false,
+        "description": "Whether to use SSL when connecting to FSSP.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_SECRET_PATH",
+        "value": "secure-store/entries",
+        "description": "The path in FSSP where secrets are stored/retrieved.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_TRUSTSTORE_FILE_TYPE",
+        "value": null,
+        "description": "The type of the truststore file (e.g., JKS, PKCS12).",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "The password for the truststore file.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_FSSP_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Path to the truststore file for SSL connections.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_TYPE",
+        "value": null,
+        "description": "Secure storage type. Supported values: EPHEMERAL, AWS_SSM, VAULT, FSSP.",
+        "type": "SECURE_STORE",
+        "essential": true
+      },
+      {
+        "name": "SECRET_STORE_VAULT_ADDRESS",
+        "value": null,
+        "description": "The address of your vault.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_ENABLE_SSL",
+        "value": false,
+        "description": "Whether or not to use SSL.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_KEYSTORE_FILE_PATH",
+        "value": null,
+        "description": "The path to a JKS keystore file containing a client cert and private key.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_KEYSTORE_PASSWORD",
+        "value": null,
+        "description": "The password used to access the JKS keystore (optional).",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_PEM_FILE_PATH",
+        "value": null,
+        "description": "The path to an X.509 certificate in unencrypted PEM format, using UTF-8 encoding.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_TOKEN",
+        "value": null,
+        "description": "Token for accessing vault, may be a root token.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+      {
+        "name": "SECRET_STORE_VAULT_TRUSTSTORE_FILE_PATH",
+        "value": null,
+        "description": "The path to a JKS truststore file containing Vault server certs that can be trusted.",
+        "type": "SECURE_STORE",
+        "essential": false
+      },
+
+      {
+        "name": "SERVER_SSL_ENABLED",
+        "value": false,
+        "description": "Manage server's mode. If true then SSL will be enabled.",
+        "type": "SSL",
+        "essential": false
+      },
+      {
+        "name": "SERVER_SSL_KEY_PASSWORD",
+        "value": null,
+        "description": "Password for key in keystore. Mandatory if SERVER_SSL_ENABLED is true.",
+        "type": "SSL",
+        "essential": false
+      },
+      {
+        "name": "SERVER_SSL_KEY_STORE",
+        "value": null,
+        "description": "Path to the keystore. Mandatory if SERVER_SSL_ENABLED is true.",
+        "type": "SSL",
+        "essential": false
+      },
+      {
+        "name": "SERVER_SSL_KEY_STORE_PASSWORD",
+        "value": null,
+        "description": "Password for keystore. Mandatory if SERVER_SSL_ENABLED is true.",
+        "type": "SSL",
+        "essential": false
+      },
+      {
+        "name": "SERVER_SSL_KEY_STORE_PROVIDER",
+        "value": "BCFIPS",
+        "description": "Provider of the keystore.",
+        "type": "SSL",
+        "essential": false
+      },
+      {
+        "name": "SERVER_SSL_KEY_STORE_TYPE",
+        "value": "BCFKS",
+        "description": "Type of the keystore. By default BCFKS value is used.",
+        "type": "SSL",
+        "essential": false
+      },
+
+      {
+        "name": "TE_TLS_ENABLED",
+        "value": false,
+        "description": "Allows to enable/disable TLS connection to mgr-tenant-entitlements module.",
+        "type": "TE",
+        "essential": false
+      },
+      {
+        "name": "TE_TLS_TRUSTSTORE_PASSWORD",
+        "value": null,
+        "description": "Truststore password for TLS connection to mgr-tenant-entitlements module.",
+        "type": "TE",
+        "essential": false
+      },
+      {
+        "name": "TE_TLS_TRUSTSTORE_PATH",
+        "value": null,
+        "description": "Truststore file path for TLS connection to mgr-tenant-entitlements module.",
+        "type": "TE",
+        "essential": false
+      },
+      {
+        "name": "TE_TLS_TRUSTSTORE_TYPE",
+        "value": null,
+        "description": "Truststore file type for TLS connection to mgr-tenant-entitlements module.",
+        "type": "TE",
+        "essential": false
+      },
+      {
+        "name": "TE_URL",
+        "value": null,
+        "description": "Tenant Entitlement URL used to perform HTTP requests by TenantEntitlementClient. Falls back to http://mgr-tenant-entitlements:8081 when not set.",
+        "type": "TE",
+        "essential": true
+      },
+      {
+        "name": "te.url",
+        "value": null,
+        "description": "Lowest-precedence property fallback for TE_URL (same setting via Spring relaxed binding).",
+        "type": "TE",
+        "essential": false
+      },
+
+      {
+        "name": "ENV",
+        "value": "folio",
+        "description": "The logical name of the deployment (kafka topic prefix), must be unique across all environments using the same shared Kafka/Elasticsearch clusters, a-z (any case), 0-9, -, _ symbols only allowed.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "FAR_MODE",
+        "value": false,
+        "description": "Allows to enable Folio Application Registry mode, if FAR mode is enabled, API Gateway integration must be disabled using environment variable APIGW_ENABLED.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Java options for the container JVM (heap and metaspace sizing, see the java defaults above). The container runtime derives defaults when unset.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "MAX_HTTP_REQUEST_HEADER_SIZE",
+        "value": "200KB",
+        "description": "Maximum size of the HTTP request header.",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "ROUTER_PATH_PREFIX",
+        "value": null,
+        "description": "Defines routes prefix to be added to the generated endpoints by OpenAPI generator (/foo/entites -> {{prefix}}/foo/entities). Required if load balancing group has format like {{host}}/{{moduleId}}; empty (no prefix) by default.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SECURITY_ENABLED",
+        "value": true,
+        "description": "Allows to enable/disable security. If true and KC_INTEGRATION_ENABLED is also true - the Keycloak will be used as a security provider.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SERVER_PORT",
+        "value": "8081",
+        "description": "Server HTTP port. Should be specified manually in case of SSL enabled.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "VALIDATION_MODE",
+        "value": "basic",
+        "description": "Validation mode applied during Application Descriptors checking (see POST /applications/validate endpoint). Possible values: none, basic, onCreate.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "tenant.url",
+        "value": null,
+        "description": "Tenant URL used to perform HTTP requests by TenantManagerClient.",
+        "type": "CONFIG",
+        "essential": true
+      },
+
+      {
+        "name": "MODULE_BOOTSTRAP_CACHE_ENABLED",
+        "value": true,
+        "description": "Enables application-scoped egress bootstrap caching. Discovery locations are always read from the database.",
+        "type": "CACHE",
+        "essential": false
+      },
+      {
+        "name": "MODULE_BOOTSTRAP_CACHE_MAX_SIZE",
+        "value": "1000",
+        "description": "Maximum number of applications held in the egress bootstrap cache.",
+        "type": "CACHE",
+        "essential": false
+      },
+      {
+        "name": "MODULE_BOOTSTRAP_CACHE_TTL",
+        "value": "1h",
+        "description": "Time after last access before an application bootstrap cache entry expires.",
+        "type": "CACHE",
+        "essential": false
+      }
+    ]
+  },
+
+  "sidecarDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for container"
+      },
+      {
+        "name": "memory",
+        "value": "512",
+        "description": "Memory hard limit for container"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "256",
+        "description": "Memory reservation for container"
+      }
+    ],
+    "java": [
+      {
+        "name": "xms",
+        "value": "128m",
+        "description": "Initial Java heap size"
+      },
+      {
+        "name": "xmx",
+        "value": "256m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "128m",
+        "description": "Maximum Java metaspace size"
+      }
+    ],
+    "EnvVars": [
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Environment",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "Java options",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "KC_AUTHORIZATION_CACHE_MAX_SIZE",
+        "value": "5000",
+        "description": "Maximum amount of entries for keycloak authorization cache.",
+        "type": "CACHE",
+        "essential": false
+      },
+      {
+        "name": "KC_URI_VALIDATION_ENABLED",
+        "value": false,
+        "description": "Defines if JsonWebTokenParser compares URI from token with KC_URL value.",
+        "type": "KC",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_HTTP_LIMITS_MAX_BODY_SIZE",
+        "value": "200M",
+        "description": "Maximum size of the HTTP request body the sidecar accepts; must accommodate large application descriptors.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_HTTP_LIMITS_MAX_INITIAL_LINE_LENGTH",
+        "value": "8192",
+        "description": "Maximum length of the HTTP request initial line.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_OTEL_SDK_DISABLED",
+        "value": true,
+        "description": "Disables the OpenTelemetry SDK in the sidecar.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_REST_CLIENT_CONNECT_TIMEOUT",
+        "value": "180000",
+        "description": "Connect timeout in milliseconds for the sidecar REST client.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_REST_CLIENT_READ_TIMEOUT",
+        "value": "180000",
+        "description": "Read timeout in milliseconds for the sidecar REST client.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_REST_CLIENT_SEND_TIMEOUT",
+        "value": "180000",
+        "description": "Send timeout in milliseconds for the sidecar REST client.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_THREAD_POOL_MAX_THREADS",
+        "value": "4",
+        "description": "Maximum number of threads in the sidecar thread pool.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "QUARKUS_VERTX_EVENT_LOOPS_POOL_SIZE",
+        "value": "1",
+        "description": "Number of Vert.x event loop threads in the sidecar.",
+        "type": "QUARKUS",
+        "essential": false
+      },
+      {
+        "name": "REQUEST_TIMEOUT",
+        "value": "604800000",
+        "description": "Configures the amount of time in milliseconds after which if the request does not return any data within the timeout period fails the request.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "SIDECAR_FORWARD_UNKNOWN_REQUESTS",
+        "value": true,
+        "description": "Set behavior for EGRESS request. If there is no information about discovery, request will be forwarded to the SIDECAR_FORWARD_UNKNOWN_REQUESTS_DESTINATION. If SIDECAR_FORWARD_UNKNOWN_REQUESTS is enabled, ROUTING_DYNAMIC_ENABLED should be disabled.",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "TOKEN_CACHE_MAX_CAPACITY",
+        "value": "5000",
+        "description": "Token cache max capacity.",
+        "type": "CACHE",
+        "essential": false
+      },
+      {
+        "name": "TOKEN_CACHE_REFRESH_PRIOR_EXPIRATION",
+        "value": "595",
+        "description": "Specifies the amount of seconds for a cache entry invalidation prior to the token expiration.",
+        "type": "CACHE",
+        "essential": false
+      }
+    ]
+  }
+}

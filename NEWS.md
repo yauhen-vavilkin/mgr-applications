@@ -1,4 +1,5 @@
 ## Version `v4.1.0` (IN PROGRESS)
+* Add `DeployConfig.json` with module deployment defaults (resources, java, deployment, gateway timeouts) and the full environment variable inventory per ADR-0013 module configuration management (MGRAPPS-120)
 * Integration with Apache APISIX: gateway self-registration via `folio-integration-apisix`, selected by `APIGW_TYPE`
   (`kong` default, `apisix`); APISIX Admin API key via `APIGW_API_KEY` (MGRENTITLE-173)
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
