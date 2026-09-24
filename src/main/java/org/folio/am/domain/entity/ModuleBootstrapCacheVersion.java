@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "module_bootstrap_cache_version")
-public class ModuleBootstrapCacheVersionEntity {
+public class ModuleBootstrapCacheVersion {
   @Id
   private Long id;
   private long version;
