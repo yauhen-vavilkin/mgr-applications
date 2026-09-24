@@ -130,6 +130,9 @@ docker run \
 | MAX_HTTP_REQUEST_HEADER_SIZE             | 200KB                        |   true   | Maximum size of the HTTP request header.                                                                                                                                                                   |
 | APIGW_REGISTER_MODULE                    | true                         |  false   | Defines if module must be registered in the API Gateway (it will create for itself service and list of routes from module descriptor)                                                                      |
 | ROUTER_PATH_PREFIX                       |                              |  false   | Defines routes prefix to be added to the generated endpoints by OpenAPI generator (`/foo/entites` -> `{{prefix}}/foo/entities`). Required if load balancing group has format like `{{host}}/{{moduleId}}`  |
+| MODULE_BOOTSTRAP_CACHE_ENABLED           | true                         |  false   | Enables application-scoped egress bootstrap caching. Discovery locations are always read from the database. |
+| MODULE_BOOTSTRAP_CACHE_TTL               | 1h                           |  false   | Time after last access before an application bootstrap cache entry expires. |
+| MODULE_BOOTSTRAP_CACHE_MAX_SIZE          | 1000                         |  false   | Maximum number of applications held in the egress bootstrap cache. |
 
 ### Deprecated environment variables
 

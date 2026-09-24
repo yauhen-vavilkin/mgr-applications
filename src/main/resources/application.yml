@@ -116,6 +116,10 @@ application:
       trust-store-password: ${SECRET_STORE_FSSP_TRUSTSTORE_PASSWORD:}
   validation:
     default-mode: ${VALIDATION_MODE:basic}
+  module-bootstrap-cache:
+    enabled: ${MODULE_BOOTSTRAP_CACHE_ENABLED:true}
+    ttl: ${MODULE_BOOTSTRAP_CACHE_TTL:1h}
+    max-size: ${MODULE_BOOTSTRAP_CACHE_MAX_SIZE:1000}
 
 tenant:
   entitlement:

@@ -29,5 +29,7 @@ The pre-existing `GET /modules/{id}` (full, globally-resolved bootstrap) is unch
 - If the requested module is not present in the supplied scope, egress returns `404`.
 - Empty/missing `applicationIds` returns `400`.
 - Required modules are filtered to the interfaces the module actually requires/optional, and deduplicated by name keeping the highest version (same as `GET /modules/{id}`).
-- Scoping is applied in SQL over the existing `v_module_bootstrap` view; there is no tenant context or DB-view change.
+- With `MODULE_BOOTSTRAP_CACHE_ENABLED=true` (the default), backend module descriptors are cached one entry per application. Each entry includes an interface-provider index; missing applications and applications without backend modules are cached as empty.
+- Discovery locations are never cached: candidate locations are read from the database for every request, so discovery changes are visible immediately on every instance.
+- Application and discovery writes advance a shared database cache version. `MODULE_BOOTSTRAP_CACHE_TTL` (default `1h`) is measured after last access, and `MODULE_BOOTSTRAP_CACHE_MAX_SIZE` (default `1000`) bounds entries. Setting the enabled variable to `false` uses the uncached query path.
 

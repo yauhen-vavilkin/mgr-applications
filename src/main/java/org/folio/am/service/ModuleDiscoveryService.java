@@ -41,6 +41,7 @@ public class ModuleDiscoveryService {
   private final ModuleDiscoveryRepository moduleDiscoveryRepository;
   private final ModuleDiscoveryMapper mapper;
   private final ApplicationEventPublisher eventPublisher;
+  private final ModuleBootstrapCacheVersionService bootstrapCacheVersionService;
 
   /**
    * Retrieves module discovery information by module id.
@@ -133,6 +134,9 @@ public class ModuleDiscoveryService {
     var updatedEntity = repository.saveAndFlush(moduleEntity);
 
     var newModuleDiscovery = mapper.convert(updatedEntity);
+    if (bootstrapCacheVersionService != null) {
+      bootstrapCacheVersionService.increment();
+    }
     eventPublisher.publishDiscoveryUpdate(newModuleDiscovery, moduleEntity.getType(), token);
 
     log.info("Module discovery updated: moduleId = {}", moduleId);
@@ -196,6 +200,9 @@ public class ModuleDiscoveryService {
     var savedModule = repository.saveAndFlush(entity);
     var moduleDiscovery = mapper.convert(savedModule);
 
+    if (bootstrapCacheVersionService != null) {
+      bootstrapCacheVersionService.increment();
+    }
     eventPublisher.publishDiscoveryCreate(moduleDiscovery, entity.getType(), token);
     log.info("Module discovery created: moduleId = {}", moduleId);
 
@@ -205,6 +212,9 @@ public class ModuleDiscoveryService {
   private void cleanModuleDiscoveryUrl(String moduleId, String token, ModuleEntity module) {
     module.setDiscoveryUrl(null);
     repository.save(module);
+    if (bootstrapCacheVersionService != null) {
+      bootstrapCacheVersionService.increment();
+    }
     eventPublisher.publishDiscoveryDelete(module.getId(), module.getId(), module.getType(), token);
     log.info("Discovery deleted: moduleId = {}", moduleId);
   }
