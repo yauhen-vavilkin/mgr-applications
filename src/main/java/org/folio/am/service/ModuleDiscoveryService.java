@@ -104,16 +104,31 @@ public class ModuleDiscoveryService {
    * @return created {@link ModuleDiscovery} information
    */
   public ModuleDiscoveries create(ModuleDiscoveries moduleDiscoveries, String token) {
+    return create(moduleDiscoveries, false, token);
+  }
+
+  /**
+   * Creates module discovery information records for a batch request.
+   *
+   * @param moduleDiscoveries - {@link ModuleDiscoveries} information batch request
+   * @param ignoreConflicts - whether to preserve and return existing discoveries
+   * @param token - x-okapi-token value
+   * @return created or existing {@link ModuleDiscovery} information
+   */
+  public ModuleDiscoveries create(ModuleDiscoveries moduleDiscoveries, boolean ignoreConflicts, String token) {
     var moduleDiscoveryMap = moduleDiscoveries.getDiscovery().stream()
       .collect(toMap(Artifact::getArtifactId, ModuleDiscovery::getLocation));
 
-    var createdModuleEntities = getValidatedModuleEntities(moduleDiscoveries).stream()
-      .map(entity -> addDiscoveryUrlForModule(entity, moduleDiscoveryMap.get(entity.getId()), token))
+    var moduleEntities = getValidatedModuleEntities(moduleDiscoveries, ignoreConflicts);
+    var moduleDiscoveriesResult = moduleEntities.stream()
+      .map(entity -> ignoreConflicts && entity.getDiscoveryUrl() != null
+        ? mapper.convert(entity)
+        : addDiscoveryUrlForModule(entity, moduleDiscoveryMap.get(entity.getId()), token))
       .collect(toList());
 
     return new ModuleDiscoveries()
-      .discovery(createdModuleEntities)
-      .totalRecords((long) createdModuleEntities.size());
+      .discovery(moduleDiscoveriesResult)
+      .totalRecords((long) moduleDiscoveriesResult.size());
   }
 
   /**
@@ -167,7 +182,7 @@ public class ModuleDiscoveryService {
     }
   }
 
-  private List<ModuleEntity> getValidatedModuleEntities(ModuleDiscoveries discoveries) {
+  private List<ModuleEntity> getValidatedModuleEntities(ModuleDiscoveries discoveries, boolean ignoreConflicts) {
     var discoveryDescriptors = discoveries.getDiscovery();
 
     var invalidIds = filterAndMap(discoveryDescriptors, notEqualIdAndArtifactId(), Artifact::getArtifactId);
@@ -176,7 +191,7 @@ public class ModuleDiscoveryService {
     }
 
     var moduleIds = mapItems(discoveryDescriptors, Artifact::getArtifactId);
-    var moduleEntities = repository.findAllById(moduleIds);
+    var moduleEntities = findModuleEntities(moduleIds, ignoreConflicts);
 
     if (moduleEntities.size() != discoveryDescriptors.size()) {
       var foundModuleIds = mapItems(moduleEntities, ModuleEntity::getId);
@@ -185,12 +200,16 @@ public class ModuleDiscoveryService {
     }
 
     var moduleIdsWithDiscoveryUrl = filterAndMap(moduleEntities, notNullDiscovery(), ArtifactEntity::getId);
-    if (isNotEmpty(moduleIdsWithDiscoveryUrl)) {
+    if (!ignoreConflicts && isNotEmpty(moduleIdsWithDiscoveryUrl)) {
       throw new EntityExistsException("Module Discovery already exists for ids: " + moduleIdsWithDiscoveryUrl);
     }
 
     var moduleEntityMap = moduleEntities.stream().collect(toMap(ArtifactEntity::getId, identity()));
     return mapItems(moduleIds, moduleEntityMap::get);
+  }
+
+  private List<ModuleEntity> findModuleEntities(List<String> moduleIds, boolean ignoreConflicts) {
+    return ignoreConflicts ? repository.findAllByIdForUpdate(moduleIds) : repository.findAllById(moduleIds);
   }
 
   private ModuleDiscovery addDiscoveryUrlForModule(ModuleEntity entity, String location, String token) {
