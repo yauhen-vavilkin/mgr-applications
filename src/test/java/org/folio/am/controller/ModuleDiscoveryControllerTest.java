@@ -18,6 +18,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.folio.am.service.ModuleDiscoveryService;
@@ -129,6 +131,64 @@ class ModuleDiscoveryControllerTest {
       .andExpect(status().isCreated())
       .andExpect(content().contentType(APPLICATION_JSON))
       .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery())), true));
+  }
+
+  @Test
+  void createModuleDiscovery_positive_batchRequestIgnoreConflictsTrue() throws Exception {
+    var request = moduleDiscoveries(moduleDiscovery().id(null));
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
+    when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN, true))
+      .thenReturn(moduleDiscoveries(moduleDiscovery()));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/modules/discovery").queryParam("ignoreConflicts", "true")
+        .content(asJsonString(request))
+        .header(TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isCreated())
+      .andExpect(content().json(asJsonString(moduleDiscoveries(moduleDiscovery())), true));
+  }
+
+  @Test
+  void createModuleDiscovery_conflict_batchRequestIgnoreConflictsFalseAndOmitted() throws Exception {
+    var request = moduleDiscoveries(moduleDiscovery().id(null));
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
+    when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN, false))
+      .thenThrow(new EntityExistsException("exists"));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/modules/discovery").queryParam("ignoreConflicts", "false")
+        .content(asJsonString(request))
+        .header(TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isConflict());
+
+    mockMvc.perform(post("/modules/discovery")
+        .content(asJsonString(request))
+        .header(TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isConflict());
+  }
+
+  @Test
+  void createModuleDiscovery_notFound_batchRequestIgnoreConflictsTrue() throws Exception {
+    var request = moduleDiscoveries(moduleDiscovery().id(null));
+    when(keycloakAuthClient.evaluatePermissions(any(MultiValueMap.class), anyString())).thenReturn(new TokenResponse());
+    when(moduleDiscoveryService.create(request, OKAPI_AUTH_TOKEN, true))
+      .thenThrow(new EntityNotFoundException("not found"));
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/modules/discovery").queryParam("ignoreConflicts", "true")
+        .content(asJsonString(request))
+        .header(TOKEN, OKAPI_AUTH_TOKEN)
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isNotFound());
   }
 
   @Test
