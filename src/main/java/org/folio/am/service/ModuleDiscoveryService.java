@@ -102,12 +102,14 @@ public class ModuleDiscoveryService {
    * @param token - x-okapi-token value
    * @return created {@link ModuleDiscovery} information
    */
-  public ModuleDiscoveries create(ModuleDiscoveries moduleDiscoveries, String token) {
+  public ModuleDiscoveries create(ModuleDiscoveries moduleDiscoveries, String token, boolean ignoreConflicts) {
     var moduleDiscoveryMap = moduleDiscoveries.getDiscovery().stream()
       .collect(toMap(Artifact::getArtifactId, ModuleDiscovery::getLocation));
 
-    var createdModuleEntities = getValidatedModuleEntities(moduleDiscoveries).stream()
-      .map(entity -> addDiscoveryUrlForModule(entity, moduleDiscoveryMap.get(entity.getId()), token))
+    var createdModuleEntities = getValidatedModuleEntities(moduleDiscoveries, ignoreConflicts).stream()
+      .map(entity -> entity.getDiscoveryUrl() != null
+        ? mapper.convert(entity)
+        : addDiscoveryUrlForModule(entity, moduleDiscoveryMap.get(entity.getId()), token))
       .collect(toList());
 
     return new ModuleDiscoveries()
@@ -163,7 +165,7 @@ public class ModuleDiscoveryService {
     }
   }
 
-  private List<ModuleEntity> getValidatedModuleEntities(ModuleDiscoveries discoveries) {
+  private List<ModuleEntity> getValidatedModuleEntities(ModuleDiscoveries discoveries, boolean ignoreConflicts) {
     var discoveryDescriptors = discoveries.getDiscovery();
 
     var invalidIds = filterAndMap(discoveryDescriptors, notEqualIdAndArtifactId(), Artifact::getArtifactId);
@@ -181,7 +183,7 @@ public class ModuleDiscoveryService {
     }
 
     var moduleIdsWithDiscoveryUrl = filterAndMap(moduleEntities, notNullDiscovery(), ArtifactEntity::getId);
-    if (isNotEmpty(moduleIdsWithDiscoveryUrl)) {
+    if (!ignoreConflicts && isNotEmpty(moduleIdsWithDiscoveryUrl)) {
       throw new EntityExistsException("Module Discovery already exists for ids: " + moduleIdsWithDiscoveryUrl);
     }
 
