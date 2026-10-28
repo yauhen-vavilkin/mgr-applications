@@ -85,6 +85,10 @@ docker run \
 
 ## Environment Variables
 
+A machine-readable inventory of these variables, including defaults and essential flags, is maintained in
+[DeployConfig.json](DeployConfig.json) as defined by
+[ADR-0013 Module configuration management](https://folio-org.atlassian.net/wiki/spaces/TC/pages/1999702996/0013-Module+configuration+management).
+
 | Name                                     | Default value                | Required | Description                                                                                                                                                                                                |
 |:-----------------------------------------|:-----------------------------|:--------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | DB_HOST                                  | localhost                    |  false   | Postgres hostname                                                                                                                                                                                          |
