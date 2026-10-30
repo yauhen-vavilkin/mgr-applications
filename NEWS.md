@@ -41,6 +41,9 @@
 * Migrate Kafka producer integration to `folio-kafka-producer` and move topic config to `application.kafka.producer` following applications-poc-tools Kafka module split (APPPOCTOOL-85)
 * Add `cleanup` endpoint for unused Applications (MGRAPPS-100)
 
+## Version `v3.0.7` (Sunflower SP#9)
+* Release mgr-applications v3.0.7 for Sunflower SP#9 (MGRAPPS-119)
+
 ## Version `v3.0.0` (12.03.2025)
 * Add module permissions to bootstrap API (MGRAPPS-48)
 * Upgrade to Java 21. (MGRAPPS-46)
