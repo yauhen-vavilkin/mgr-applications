@@ -7,6 +7,9 @@
 * Cache application-scoped module bootstrap data while keeping discovery locations uncached (MGRAPPS-127)
 * Switch Kong integration test container to folioci/folio-kong image (APPPOCTOOL-37)
 * Remove Kong gateway route management (discovery-driven service/route synchronization and tenant checks via entitlement events); module self-registration in Kong remains (MGRAPPS-108)
+* Edge modules can no longer produce unnecessary Kong services: the discovery-driven gateway management that created a
+  Kong service per module upon discovery registration, even for edge modules whose endpoints are not listed in their
+  module descriptors, has been removed (MGRAPPS-64)
 * Generalize API Gateway configuration to `application.apigw.*` properties and `APIGW_*` environment variables; legacy
   `application.kong.*` properties and `KONG_*` variables keep working, are reported with a `WARN` at startup and are
   planned for removal in the `Vetch` release (EUREKA-887)
