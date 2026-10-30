@@ -12,6 +12,16 @@
     "url": {
       "description": "URL to the artifact",
       "type": "string"
+    },
+    "attributes": {
+      "description": "Arbitrary list of key-value pairs (both of type string) with additional information about the module",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
     }
   }
 }

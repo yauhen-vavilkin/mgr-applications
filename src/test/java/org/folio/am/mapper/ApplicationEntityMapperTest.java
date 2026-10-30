@@ -3,6 +3,7 @@ package org.folio.am.mapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
@@ -36,6 +37,7 @@ class ApplicationEntityMapperTest {
     applicationDescriptor.setName("app1");
     var dependency = new Dependency().name("app2").version("^2.0.1");
     applicationDescriptor.setDependencies(List.of(dependency));
+    applicationDescriptor.setAttributes(List.of(Map.of("type", "sample")));
     applicationEntity.setApplicationDescriptor(applicationDescriptor);
 
     var actualApplicationDescriptor = mapper.convert(applicationEntity);
@@ -44,6 +46,7 @@ class ApplicationEntityMapperTest {
     assertThat(actualApplicationDescriptor.getVersion()).isEqualTo(applicationEntity.getVersion());
     assertThat(actualApplicationDescriptor.getId()).isEqualTo(applicationEntity.getId());
     assertThat(actualApplicationDescriptor.getDependencies()).containsOnly(dependency);
+    assertThat(actualApplicationDescriptor.getAttributes()).isEmpty();
     assertThat(actualApplicationDescriptor.getModuleDescriptors()).contains(beModuleDescriptor);
     assertThat(actualApplicationDescriptor.getUiModuleDescriptors()).contains(uiModuleDescriptor);
   }

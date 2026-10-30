@@ -3,6 +3,11 @@
    "version":"1.3.7",
    "name":"application",
    "description":"Application 1 description",
+   "attributes":[
+      {
+         "type":"sample-app"
+      }
+   ],
    "modules":[
       {
          "id":"mod-foo-1.3.5",
@@ -17,8 +22,13 @@
       {
          "id":"mod-baz-1.0.0",
          "name":"mod-baz",
-         "version":"1.0.0"
-         "url":"http://localhost:8080/modules/mod-baz-1.0.0.zip"
+         "version":"1.0.0",
+         "url":"http://localhost:8080/modules/mod-baz-1.0.0.zip",
+         "attributes":[
+            {
+               "type":"edge-module"
+            }
+         ]
       }
    ],
    "moduleDescriptors":[
@@ -61,7 +71,12 @@
       {
          "id":"folio_foo-2.0.0",
          "name":"folio_foo",
-         "version":"2.0.0"
+         "version":"2.0.0",
+         "attributes":[
+            {
+               "bundle":"stripes"
+            }
+         ]
       }
    ],
    "uiModuleDescriptors":[

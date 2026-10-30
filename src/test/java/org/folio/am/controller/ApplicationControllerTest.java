@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.extern.log4j.Log4j2;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -37,6 +38,7 @@ import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.ApplicationDescriptors;
 import org.folio.am.domain.dto.ApplicationDescriptorsValidation;
 import org.folio.am.domain.dto.Dependency;
+import org.folio.am.domain.dto.Module;
 import org.folio.am.service.ApplicationCleanupService;
 import org.folio.am.service.ApplicationDescriptorsValidationService;
 import org.folio.am.service.ApplicationReferencesValidationService;
@@ -232,6 +234,36 @@ class ApplicationControllerTest {
 
     var actual = parseResponse(mvcResult, ApplicationDescriptor.class);
     assertThat(actual).isEqualTo(applicationDescriptor);
+  }
+
+  @Test
+  void create_positive_attributesAreAcceptedAndReturned() throws Exception {
+    var uiModuleId = "folio_test-1.0.0";
+    var applicationDescriptor = new ApplicationDescriptor()
+      .id(APPLICATION_ID)
+      .name("test")
+      .version("1.0.0")
+      .attributes(List.of(Map.of("type", "sample-app")))
+      .modules(singletonList(new Module().id(MODULE_ID).name("mod-test").version("1.0.0")
+        .attributes(List.of(Map.of("type", "edge")))))
+      .moduleDescriptors(singletonList(new ModuleDescriptor().id(MODULE_ID).description("test")))
+      .uiModules(singletonList(new Module().id(uiModuleId).name("folio_test").version("1.0.0")
+        .attributes(List.of(Map.of("bundle", "stripes")))))
+      .uiModuleDescriptors(singletonList(new ModuleDescriptor().id(uiModuleId).description("test")));
+
+    when(applicationService.create(applicationDescriptor, OKAPI_AUTH_TOKEN, true)).thenReturn(applicationDescriptor);
+    when(jsonWebTokenParser.parse(OKAPI_AUTH_TOKEN)).thenReturn(jsonWebToken);
+    when(jsonWebToken.getIssuer()).thenReturn(TOKEN_ISSUER);
+    when(jsonWebToken.getSubject()).thenReturn(TOKEN_SUB);
+
+    mockMvc.perform(post("/applications")
+        .content(asJsonString(applicationDescriptor))
+        .contentType(APPLICATION_JSON)
+        .header(OkapiHeaders.TOKEN, OKAPI_AUTH_TOKEN))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.attributes[0].type", is("sample-app")))
+      .andExpect(jsonPath("$.modules[0].attributes[0].type", is("edge")))
+      .andExpect(jsonPath("$.uiModules[0].attributes[0].bundle", is("stripes")));
   }
 
   @Test

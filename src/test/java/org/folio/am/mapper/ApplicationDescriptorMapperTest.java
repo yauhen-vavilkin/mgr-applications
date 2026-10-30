@@ -9,6 +9,7 @@ import static org.folio.common.utils.CollectionUtils.takeOne;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
+import java.util.Map;
 import org.folio.am.domain.dto.ApplicationDescriptor;
 import org.folio.am.domain.dto.Dependency;
 import org.folio.am.domain.dto.Module;
@@ -60,6 +61,27 @@ class ApplicationDescriptorMapperTest {
     var dep2 = deps.stream().filter(dep -> "dep2".equals(dep.getName())).findFirst().orElseThrow();
     assertEquals(false, dep1.getOptional());
     assertEquals(true, dep2.getOptional());
+  }
+
+  @Test
+  void convert_attributes_keptInStoredApplicationDescriptor() {
+    var applicationAttributes = List.of(Map.of("type", "sample-app"));
+    var moduleAttributes = List.of(Map.of("type", "edge"), Map.of("tier", "critical"));
+
+    var descriptor = new ApplicationDescriptor()
+      .id(APPLICATION_ID).name("app1").version("1.0.0")
+      .attributes(applicationAttributes)
+      .modules(List.of(new Module().id("module1-1.0.0").name("module1").version("1.0.0")
+        .attributes(moduleAttributes)))
+      .moduleDescriptors(List.of(new ModuleDescriptor().id("module1-1.0.0").description("module1")));
+
+    var descriptorEntity = mapper.convert(descriptor);
+
+    var storedDescriptor = descriptorEntity.getApplicationDescriptor();
+    assertThat(storedDescriptor.getAttributes()).isEqualTo(applicationAttributes);
+    assertThat(storedDescriptor.getModules().getFirst().getAttributes()).isEqualTo(moduleAttributes);
+    assertThat(storedDescriptor.getModuleDescriptors()).isNull();
+    assertThat(storedDescriptor.getUiModuleDescriptors()).isNull();
   }
 
   @Test
