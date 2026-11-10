@@ -1,6 +1,6 @@
 ## Version `v4.1.0` (IN PROGRESS)
 * Allow an optional `attributes` property (a list of string key-value pairs) at the top level of the application descriptor
-  and in its `modules`/`uiModules` entries; the value is stored and returned as-is and can be ignored by the system (MGRAPPS-21)
+  and in its `modules`/`uiModules` entries; the value is stored and returned as-is and is not used by the system (MGRAPPS-21)
 * Integration with Apache APISIX: gateway self-registration via `folio-integration-apisix`, selected by `APIGW_TYPE`
   (`kong` default, `apisix`); APISIX Admin API key via `APIGW_API_KEY` (MGRENTITLE-173)
 * Allow interface to be both provided and require / optional in the same module descriptor (MGRAPPS-99)
