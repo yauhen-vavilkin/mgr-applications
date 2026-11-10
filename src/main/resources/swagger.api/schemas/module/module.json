@@ -17,6 +17,7 @@
       "description": "Arbitrary list of key-value pairs (both of type string) with additional information about the module",
       "type": "array",
       "items": {
+        "description": "A single attribute entry: string keys mapped to string values",
         "type": "object",
         "minProperties": 1,
         "additionalProperties": {
